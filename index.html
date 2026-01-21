@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checking your browser...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    background: #f2f2f2;
+    font-family: Tahoma, Arial, sans-serif;
+  }
+  .box {
+    max-width: 440px;
+    margin: 100px auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+  }
+  .header {
+    font-size: 12px;
+    color: #666;
+    text-align: left;
+  }
+  .badges {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #2b7cff;
+  }
+  .failure {
+    font-size: 12px;
+    color: #aa0000;
+    margin-top: 6px;
+  }
+  .ip {
+    font-size: 12px;
+    color: #aa0000;
+    margin-top: 8px;
+  }
+  .xp-bar-container {
+    height: 18px;
+    border: 1px solid #666;
+    background: #d4d0c8;
+    overflow: hidden;
+    margin: 15px 0;
+  }
+  .xp-bar {
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(
+      90deg,#0a246a 25%,#a6caf0 50%,#0a246a 75%);
+    animation: move 1.2s linear infinite;
+  }
+  @keyframes move {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(350%); }
+  }
+  .hidden { display:none; }
+  input { width: 100%; margin-top: 10px; }
+  button { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<audio id="errorSound">
+  <source src="https://www.soundjay.com/button/sounds/button-10.mp3">
+</audio>
+
+<!-- STAGE 1 -->
+<div class="box" id="stage1">
+  <div class="header">Step 2 of 2</div>
+  <h3>Checking your browser…</h3>
+  <p>Please wait while we verify your connection.</p>
+
+  <div class="xp-bar-container"><div class="xp-bar"></div></div>
+
+  <p id="s1">Analyzing behavior…</p>
+
+  <div class="badges">
+    ✓ Human Interaction Certified<br>
+    ✓ WCAG-ish Compliant<br>
+    ✓ Cloud Security Verified
+  </div>
+
+  <div class="failure">Failure rate: 92%</div>
+  <div class="ip">IP reputation: LOW</div>
+</div>
+
+<!-- STAGE 2 -->
+<div class="box hidden" id="stage2">
+  <div class="header">Step 2 of 2</div>
+  <h3>Slide to verify</h3>
+  <input type="range" id="slider">
+  <p id="s2">Almost…</p>
+
+  <div class="badges">
+    ✓ Bot Detection Enabled
+  </div>
+
+  <div class="failure">Failure rate: 92%</div>
+  <div class="ip">IP reputation: LOW</div>
+</div>
+
+<!-- STAGE 3 -->
+<div class="box hidden" id="stage3">
+  <div class="header">Step 2 of 2</div>
+  <h3>Final verification</h3>
+  <p id="question">What is 12 + 8?</p>
+  <input id="answer">
+  <button onclick="submitMath()">Submit</button>
+  <p id="s3"></p>
+
+  <div class="failure">Failure rate: 92%</div>
+  <div class="ip">IP reputation: LOW</div>
+</div>
+
+<script>
+const errorSound = document.getElementById("errorSound");
+let last = Date.now();
+
+/* INTERACTION PUNISHMENT */
+["mousemove","keydown","mousedown","scroll","touchstart"]
+.forEach(e => document.addEventListener(e, () => {
+  last = Date.now();
+  errorSound.play();
+}));
+
+/* DEVTOOLS DETECTION */
+setInterval(() => {
+  if (window.outerWidth - window.innerWidth > 160 ||
+      window.outerHeight - window.innerHeight > 160) {
+    location.reload();
+  }
+}, 500);
+
+/* STAGE 1 PASS ONLY BY INACTION */
+setInterval(() => {
+  if (Date.now() - last > 6000) {
+    stage1.classList.add("hidden");
+    stage2.classList.remove("hidden");
+  }
+}, 500);
+
+/* STAGE 2 SABOTAGE */
+slider.addEventListener("input", () => {
+  slider.value = Math.random() * 75;
+  errorSound.play();
+  if (Math.random() > 0.94) {
+    stage2.classList.add("hidden");
+    stage3.classList.remove("hidden");
+  }
+});
+
+/* STAGE 3 GASLIGHT + RICKROLL */
+function submitMath() {
+  question.innerText = "What is 7 × 9?";
+  s3.innerText = "Correct. Previously.";
+  errorSound.play();
+
+  setTimeout(() => {
+    location.href =
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ&redirect_back=true";
+  }, 2000);
+}
+
+/* LOOP BACK AFTER RICKROLL */
+if (document.referrer.includes("youtube.com")) {
+  setTimeout(() => location.reload(), 1000);
+}
+</script>
+
+</body>
+</html>
