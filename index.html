@@ -6,18 +6,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { background: #f2f2f2; font-family: Tahoma, Arial, sans-serif; }
-.box { max-width: 440px; margin: 80px auto; background: #fff; border: 1px solid #ccc; padding: 20px; text-align: center; }
-.header { font-size: 12px; color: #666; text-align: left; }
-.badges { margin-top: 8px; font-size: 11px; color: #2b7cff; }
-.failure { font-size: 12px; color: #aa0000; margin-top: 6px; }
-.ip { font-size: 12px; color: #aa0000; margin-top: 8px; }
-.xp-bar-container { height: 18px; border: 1px solid #666; background: #d4d0c8; overflow: hidden; margin: 15px 0; }
-.xp-bar { height: 100%; width: 40%; background: linear-gradient(90deg,#0a246a 25%,#a6caf0 50%,#0a246a 75%); animation: move 1.2s linear infinite; }
+body {
+  background: #000 url('https://www.transparenttextures.com/patterns/matrix.png') repeat;
+  color: #00ff00;
+  font-family: "Courier New", Courier, monospace;
+  overflow-x: hidden;
+}
+.box {
+  max-width: 480px;
+  margin: 60px auto;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #00ff00;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 20px #00ff00;
+}
+.header { font-size: 12px; color: #66ff66; text-align: left; }
+.badges { margin-top: 8px; font-size: 11px; color: #66ff66; }
+.failure { font-size: 12px; color: #ff3333; margin-top: 6px; }
+.ip { font-size: 12px; color: #ff3333; margin-top: 8px; }
+.xp-bar-container { height: 18px; border: 1px solid #66ff66; background: #111; overflow: hidden; margin: 15px 0; }
+.xp-bar { height: 100%; width: 40%; background: linear-gradient(90deg,#00ff00 25%,#66ff66 50%,#00ff00 75%); animation: move 1.2s linear infinite; }
 @keyframes move { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
 .hidden { display:none; }
-input { width: 100%; margin-top: 10px; }
-button { margin-top: 10px; }
+input[type="range"] { width: 100%; margin-top: 10px; }
+input[type="text"] { width: 100%; margin-top: 10px; background: #000; color: #00ff00; border: 1px solid #00ff00; padding: 5px; }
+button { margin-top: 10px; background: #000; color: #00ff00; border: 1px solid #00ff00; padding: 5px 10px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -29,7 +43,7 @@ button { margin-top: 10px; }
 <!-- STAGE 1 -->
 <div class="box" id="stage1">
   <div class="header">Step 2 of 2</div>
-  <h3>Checking your browser…</h3>
+  <h3>Checking your connection…</h3>
   <p>This process is automatic. Please wait while we verify your connection.</p>
   <div class="xp-bar-container"><div class="xp-bar"></div></div>
   <p id="s1">Analyzing behavior…</p>
@@ -58,7 +72,7 @@ button { margin-top: 10px; }
   <div class="header">Step 2 of 2</div>
   <h3>Final verification</h3>
   <p id="question"></p>
-  <input id="answer">
+  <input type="text" id="answer" placeholder="Enter answer…">
   <button onclick="submitMath()">Submit</button>
   <p id="s3"></p>
   <div class="failure">Failure rate: 92%</div>
@@ -91,114 +105,115 @@ const s1 = document.getElementById("s1");
 const s2 = document.getElementById("s2");
 const s3 = document.getElementById("s3");
 const slider = document.getElementById("slider");
-
 let currentStage = 1;
 
-/* Stage 1 random timer 20-120 sec */
-let stage1Threshold = 20000 + Math.random() * 30000; 
+/* Stage 1 XP bar creep (90-120 sec) */
+let stage1Duration = 90000 + Math.random()*30000;
+setTimeout(goStage2, stage1Duration);
 
-setInterval(() => {
-  let idle = Date.now() - lastInteraction;
+/* Optional: slowly creep XP bar visually */
+let xpProgress = 0;
+let xpInterval = setInterval(()=>{
+  xpProgress += Math.random()*0.8; // slow random increment
+  if(xpProgress>99) xpProgress=99;
+  document.querySelector(".xp-bar").style.width = xpProgress + "%";
+},1000);
 
-  // Random backward jump 15% chance
-  if (Math.random() < 0.15) {
-    if (currentStage > 1) goBackStage();
-  }
-
-  if (currentStage === 1) {
-    if (idle > stage1Threshold) goStage2();
-    else {
-      const msgs = ["Still analyzing…","Almost done…","Re-evaluating…","Checking integrity…"];
-      s1.innerText = msgs[Math.floor(Math.random()*msgs.length)];
-    }
-  }
-}, 1000);
-
-/* ---------- Stage 2 ---------- */
-const sliderPassChance = 0.02;
+/* ---------- STAGE 2: Smooth resistive slider ---------- */
+const sliderPassChance = 0.02; // 2% chance to pass
 
 slider.addEventListener("input", () => {
-  slider.value = Math.random() * 75; 
-  errorSound.play();
-  const msgs = ["So close…","Try again…","Almost…","Keep sliding…"];
+  let current = parseFloat(slider.value);
+
+  // resistance stronger near end
+  let resistance = Math.max(0.2, 1 - current / 100);
+  let pushback = Math.random() * 5 * resistance;
+
+  // Animate back smoothly
+  let steps = 10, i=0;
+  let step = pushback/steps;
+  let anim = setInterval(()=>{
+    if(i++>=steps){ clearInterval(anim); return; }
+    slider.value = Math.max(0, parseFloat(slider.value)-step);
+  },20);
+
+  const msgs = ["So close…","Try again…","Almost…","Keep sliding…","Just a bit more…"];
   s2.innerText = msgs[Math.floor(Math.random()*msgs.length)];
-  if (Math.random() < sliderPassChance) goStage3();
+  errorSound.play();
+
+  if(Math.random()<sliderPassChance){
+    stage2.classList.add("hidden");
+    stage3.classList.remove("hidden");
+    initStage3();
+  }
 });
 
-/* ---------- Stage 3: Random Math ---------- */
+/* ---------- STAGE 3: Random math gaslight ---------- */
 let gaslightIndex = 0;
-let num1, num2;
+let num1,num2;
+const gaslightMsgs=["Correct. Previously.","Correct. Previously.","Correct. Previously…","Correct. Previously…","Correct. Previously..."];
 
-const gaslightMsgs = [
-  "Correct. Previously.",
-  "Correct. Previously.",
-  "Correct. Previously…",
-  "Correct. Previously…",
-  "Correct. Previously..."
-];
-
-function initStage3() {
-  gaslightIndex = 0;
+function initStage3(){
+  gaslightIndex=0;
   num1 = Math.floor(Math.random()*20)+1;
   num2 = Math.floor(Math.random()*20)+1;
-  question.innerText = `What is ${num1} + ${num2}?`;
-  s3.innerText = "Enter your answer:";
-  document.getElementById("answer").value = "";
-  currentStage = 3;
+  question.innerText=`What is ${num1} + ${num2}?`;
+  s3.innerText="Enter your answer:";
+  document.getElementById("answer").value="";
+  currentStage=3;
 }
 
-function submitMath() {
+function submitMath(){
   const val = document.getElementById("answer").value.trim();
   const correct = num1 + num2;
 
-  // Correct answers get gaslit
-  if (parseInt(val) === correct && gaslightIndex < gaslightMsgs.length) {
+  if(parseInt(val)===correct && gaslightIndex<gaslightMsgs.length){
     s3.innerText = gaslightMsgs[gaslightIndex];
     gaslightIndex++;
-    document.getElementById("answer").value = "";
+    document.getElementById("answer").value="";
     errorSound.play();
     return;
   }
 
-  // Wrong answer -> proceed
-  s3.innerText = "Verification accepted. Redirecting…";
+  s3.innerText="Verification accepted. Redirecting…";
   errorSound.play();
-  setTimeout(() => {
-    window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&redirect_back=true";
-  }, 7000);
+  setTimeout(()=>window.location.href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&redirect_back=true",7000);
 }
 
-/* ---------- Stage transitions ---------- */
-function goStage2() {
+/* ---------- STAGE TRANSITIONS ---------- */
+function goStage2(){
   stage1.classList.add("hidden");
   stage2.classList.remove("hidden");
-  s2.innerText = "Almost…";
-  currentStage = 2;
+  s2.innerText="Almost…";
+  currentStage=2;
 }
 
-function goStage3() {
+function goStage3(){
   stage2.classList.add("hidden");
   stage3.classList.remove("hidden");
   initStage3();
 }
 
-function goBackStage() {
-  if (currentStage === 2) {
-    stage2.classList.add("hidden");
-    stage1.classList.remove("hidden");
-    s1.innerText = "Oops… rechecking data…";
-    currentStage = 1;
-  } else if (currentStage === 3) {
-    stage3.classList.add("hidden");
-    stage2.classList.remove("hidden");
-    s2.innerText = "Something went wrong… try sliding again…";
-    currentStage = 2;
+/* Optional backward jumps */
+setInterval(()=>{
+  if(Math.random()<0.15){
+    if(currentStage===2){
+      stage2.classList.add("hidden");
+      stage1.classList.remove("hidden");
+      s1.innerText="Oops… rechecking data…";
+      currentStage=1;
+    }else if(currentStage===3){
+      stage3.classList.add("hidden");
+      stage2.classList.remove("hidden");
+      s2.innerText="Something went wrong… try sliding again…";
+      currentStage=2;
+    }
   }
-}
+},10000);
 
 /* ---------- LOOP BACK AFTER RICKROLL ---------- */
-if (document.referrer.includes("youtube.com")) {
-  setTimeout(() => location.reload(), 1000);
+if(document.referrer.includes("youtube.com")){
+  setTimeout(()=>location.reload(),1000);
 }
 </script>
 
