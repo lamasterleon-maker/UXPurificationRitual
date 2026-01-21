@@ -2,63 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Checking your browser...</title>
+<title>UXPurificationRitual</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    background: #f2f2f2;
-    font-family: Tahoma, Arial, sans-serif;
-  }
-  .box {
-    max-width: 440px;
-    margin: 100px auto;
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 20px;
-    text-align: center;
-  }
-  .header {
-    font-size: 12px;
-    color: #666;
-    text-align: left;
-  }
-  .badges {
-    margin-top: 8px;
-    font-size: 11px;
-    color: #2b7cff;
-  }
-  .failure {
-    font-size: 12px;
-    color: #aa0000;
-    margin-top: 6px;
-  }
-  .ip {
-    font-size: 12px;
-    color: #aa0000;
-    margin-top: 8px;
-  }
-  .xp-bar-container {
-    height: 18px;
-    border: 1px solid #666;
-    background: #d4d0c8;
-    overflow: hidden;
-    margin: 15px 0;
-  }
-  .xp-bar {
-    height: 100%;
-    width: 40%;
-    background: linear-gradient(
-      90deg,#0a246a 25%,#a6caf0 50%,#0a246a 75%);
-    animation: move 1.2s linear infinite;
-  }
-  @keyframes move {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(350%); }
-  }
-  .hidden { display:none; }
-  input { width: 100%; margin-top: 10px; }
-  button { margin-top: 10px; }
+body { background: #f2f2f2; font-family: Tahoma, Arial, sans-serif; }
+.box { max-width: 440px; margin: 80px auto; background: #fff; border: 1px solid #ccc; padding: 20px; text-align: center; }
+.header { font-size: 12px; color: #666; text-align: left; }
+.badges { margin-top: 8px; font-size: 11px; color: #2b7cff; }
+.failure { font-size: 12px; color: #aa0000; margin-top: 6px; }
+.ip { font-size: 12px; color: #aa0000; margin-top: 8px; }
+.xp-bar-container { height: 18px; border: 1px solid #666; background: #d4d0c8; overflow: hidden; margin: 15px 0; }
+.xp-bar { height: 100%; width: 40%; background: linear-gradient(90deg,#0a246a 25%,#a6caf0 50%,#0a246a 75%); animation: move 1.2s linear infinite; }
+@keyframes move { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
+.hidden { display:none; }
+input { width: 100%; margin-top: 10px; }
+button { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -71,18 +30,14 @@
 <div class="box" id="stage1">
   <div class="header">Step 2 of 2</div>
   <h3>Checking your browser…</h3>
-  <p>Please wait while we verify your connection.</p>
-
+  <p>This process is automatic. Please wait while we verify your connection.</p>
   <div class="xp-bar-container"><div class="xp-bar"></div></div>
-
   <p id="s1">Analyzing behavior…</p>
-
   <div class="badges">
     ✓ Human Interaction Certified<br>
     ✓ WCAG-ish Compliant<br>
     ✓ Cloud Security Verified
   </div>
-
   <div class="failure">Failure rate: 92%</div>
   <div class="ip">IP reputation: LOW</div>
 </div>
@@ -93,11 +48,7 @@
   <h3>Slide to verify</h3>
   <input type="range" id="slider">
   <p id="s2">Almost…</p>
-
-  <div class="badges">
-    ✓ Bot Detection Enabled
-  </div>
-
+  <div class="badges">✓ Bot Detection Enabled</div>
   <div class="failure">Failure rate: 92%</div>
   <div class="ip">IP reputation: LOW</div>
 </div>
@@ -106,65 +57,146 @@
 <div class="box hidden" id="stage3">
   <div class="header">Step 2 of 2</div>
   <h3>Final verification</h3>
-  <p id="question">What is 12 + 8?</p>
+  <p id="question"></p>
   <input id="answer">
   <button onclick="submitMath()">Submit</button>
   <p id="s3"></p>
-
   <div class="failure">Failure rate: 92%</div>
   <div class="ip">IP reputation: LOW</div>
 </div>
 
 <script>
 const errorSound = document.getElementById("errorSound");
-let last = Date.now();
+let lastInteraction = Date.now();
 
-/* INTERACTION PUNISHMENT */
+/* ---------- INTERACTION PUNISHMENT ---------- */
 ["mousemove","keydown","mousedown","scroll","touchstart"]
 .forEach(e => document.addEventListener(e, () => {
-  last = Date.now();
+  lastInteraction = Date.now();
   errorSound.play();
 }));
 
-/* DEVTOOLS DETECTION */
+/* ---------- DEVTOOLS DETECTION ---------- */
 setInterval(() => {
-  if (window.outerWidth - window.innerWidth > 160 ||
-      window.outerHeight - window.innerHeight > 160) {
+  if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
     location.reload();
   }
 }, 500);
 
-/* STAGE 1 PASS ONLY BY INACTION */
-setInterval(() => {
-  if (Date.now() - last > 6000) {
-    stage1.classList.add("hidden");
-    stage2.classList.remove("hidden");
-  }
-}, 500);
+/* ---------- STAGE HANDLING ---------- */
+const stage1 = document.getElementById("stage1");
+const stage2 = document.getElementById("stage2");
+const stage3 = document.getElementById("stage3");
+const s1 = document.getElementById("s1");
+const s2 = document.getElementById("s2");
+const s3 = document.getElementById("s3");
+const slider = document.getElementById("slider");
 
-/* STAGE 2 SABOTAGE */
-slider.addEventListener("input", () => {
-  slider.value = Math.random() * 75;
-  errorSound.play();
-  if (Math.random() > 0.94) {
-    stage2.classList.add("hidden");
-    stage3.classList.remove("hidden");
+let currentStage = 1;
+
+/* Stage 1 random timer 90-120 sec */
+let stage1Threshold = 90000 + Math.random() * 30000; 
+
+setInterval(() => {
+  let idle = Date.now() - lastInteraction;
+
+  // Random backward jump 15% chance
+  if (Math.random() < 0.15) {
+    if (currentStage > 1) goBackStage();
   }
+
+  if (currentStage === 1) {
+    if (idle > stage1Threshold) goStage2();
+    else {
+      const msgs = ["Still analyzing…","Almost done…","Re-evaluating…","Checking integrity…"];
+      s1.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+    }
+  }
+}, 1000);
+
+/* ---------- Stage 2 ---------- */
+const sliderPassChance = 0.02;
+
+slider.addEventListener("input", () => {
+  slider.value = Math.random() * 75; 
+  errorSound.play();
+  const msgs = ["So close…","Try again…","Almost…","Keep sliding…"];
+  s2.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+  if (Math.random() < sliderPassChance) goStage3();
 });
 
-/* STAGE 3 GASLIGHT + RICKROLL */
-function submitMath() {
-  question.innerText = "What is 7 × 9?";
-  s3.innerText = "Correct. Previously.";
-  errorSound.play();
+/* ---------- Stage 3: Random Math ---------- */
+let gaslightIndex = 0;
+let num1, num2;
 
-  setTimeout(() => {
-    location.href =
-      "https://www.youtube.com/watch?v=dQw4w9WgXcQ&redirect_back=true";
-  }, 2000);
+const gaslightMsgs = [
+  "Correct. Previously.",
+  "Correct. Previously.",
+  "Correct. Previously…",
+  "Correct. Previously…",
+  "Correct. Previously..."
+];
+
+function initStage3() {
+  gaslightIndex = 0;
+  num1 = Math.floor(Math.random()*20)+1;
+  num2 = Math.floor(Math.random()*20)+1;
+  question.innerText = `What is ${num1} + ${num2}?`;
+  s3.innerText = "Enter your answer:";
+  document.getElementById("answer").value = "";
+  currentStage = 3;
 }
 
-/* LOOP BACK AFTER RICKROLL */
+function submitMath() {
+  const val = document.getElementById("answer").value.trim();
+  const correct = num1 + num2;
+
+  // Correct answers get gaslit
+  if (parseInt(val) === correct && gaslightIndex < gaslightMsgs.length) {
+    s3.innerText = gaslightMsgs[gaslightIndex];
+    gaslightIndex++;
+    document.getElementById("answer").value = "";
+    errorSound.play();
+    return;
+  }
+
+  // Wrong answer -> proceed
+  s3.innerText = "Verification accepted. Redirecting…";
+  errorSound.play();
+  setTimeout(() => {
+    window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&redirect_back=true";
+  }, 7000);
+}
+
+/* ---------- Stage transitions ---------- */
+function goStage2() {
+  stage1.classList.add("hidden");
+  stage2.classList.remove("hidden");
+  s2.innerText = "Almost…";
+  currentStage = 2;
+}
+
+function goStage3() {
+  stage2.classList.add("hidden");
+  stage3.classList.remove("hidden");
+  initStage3();
+}
+
+function goBackStage() {
+  if (currentStage === 2) {
+    stage2.classList.add("hidden");
+    stage1.classList.remove("hidden");
+    s1.innerText = "Oops… rechecking data…";
+    currentStage = 1;
+  } else if (currentStage === 3) {
+    stage3.classList.add("hidden");
+    stage2.classList.remove("hidden");
+    s2.innerText = "Something went wrong… try sliding again…";
+    currentStage = 2;
+  }
+}
+
+/* ---------- LOOP BACK AFTER RICKROLL ---------- */
 if (document.referrer.includes("youtube.com")) {
   setTimeout(() => location.reload(), 1000);
 }
